@@ -58,7 +58,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ${{ steps.deb.outputs.path }}
-          asset_name: ${{ steps.deb.outputs.path }}
+          asset_name: file64copy.deb
           asset_content_type: application/octet-stream
 
       - name: Upload Fedora Package
@@ -68,7 +68,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ${{ steps.rpm.outputs.path }}
-          asset_name: ${{ steps.rpm.outputs.path }}
+          asset_name: file64copy.rpm
           asset_content_type: application/octet-stream
 
       - name: Upload Arch Package
@@ -78,5 +78,5 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ${{ steps.arch.outputs.path }}
-          asset_name: ${{ steps.arch.outputs.path }}
+          asset_name: file64copy.pkg.tar.zst
           asset_content_type: application/octet-stream
