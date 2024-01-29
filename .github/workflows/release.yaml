@@ -32,7 +32,7 @@ jobs:
         run: |
           fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
           OUTPUT=$(ls file64copy*.deb)
-          echo "path=${OUTPUT}" >> $GITHUB_ENV
+          echo "path=${OUTPUT}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build Fedora package
@@ -40,7 +40,7 @@ jobs:
         run: |
           fpm -s dir -t rpm -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
           OUTPUT=$(ls file64copy*.rpm)
-          echo "path=${OUTPUT}" >> $GITHUB_ENV
+          echo "path=${OUTPUT}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build Arch package
@@ -48,7 +48,7 @@ jobs:
         run: |
           fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
           OUTPUT=$(ls file64copy*.pkg.tar.zst)
-          echo "path=${OUTPUT}" >> $GITHUB_ENV
+          echo "path=${OUTPUT}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Upload Debian Package
