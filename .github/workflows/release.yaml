@@ -34,22 +34,22 @@ jobs:
       - name: Build Debian package
         id: deb
         run: |
-          OUTPUT=$(fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
-          echo "::set-output name=path::${OUTPUT#*path=}"
+          OUTPUT=$(fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy | awk -F'\"' '/:path=>/ {print $2}')
+          echo "path=${OUTPUT}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build Fedora package
         id: rpm
         run: |
-          OUTPUT=$(fpm -s dir -t rpm -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
-          echo "::set-output name=path::${OUTPUT#*path=}"
+          OUTPUT=$(fpm -s dir -t rpm -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy | awk -F'\"' '/:path=>/ {print $2}')
+          echo "path=${OUTPUT}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build Arch package
         id: arch
         run: |
-          OUTPUT=$(fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
-          echo "::set-output name=path::${OUTPUT#*path=}"
+          OUTPUT=$(fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy | awk -F'\"' '/:path=>/ {print $2}')
+          echo "path=${OUTPUT}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Upload Debian Package
