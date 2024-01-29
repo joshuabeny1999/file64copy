@@ -3,11 +3,6 @@ name: Release
 on:
   release:
     types: [created]
-name: Release
-
-on:
-  release:
-    types: [created]
   workflow_run:
     workflows: ["Test"]
     types:
