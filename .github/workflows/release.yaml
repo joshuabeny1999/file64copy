@@ -10,41 +10,6 @@ on:
 
 jobs:
   release:
-    needs: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ^1.21
-
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Get dependencies
-        run: go get -v -t -d ./...
-
-      - name: Build
-        run: go build -ldflags "-X main.version=${{ github.ref_name }}" -v .
-
-      - name: Install FPM and bsdtar
-        run: |
-          sudo apt-get install ruby ruby-dev rubygems build-essential libarchive-tools
-          sudo gem install --no-document fpm
-
-      - name: Build Debian package
-        id: deb
-        run: |
-          OUTPUT=$(fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
-          echo "::set-output name=path::${OUTPUT#*path=}"
-        shell: bash
-
-      - name: Build Fedora package
-        id: rpm
-        run: |
-
-jobs:
-  release:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
