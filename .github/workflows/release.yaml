@@ -20,7 +20,7 @@ jobs:
         run: go get -v -t -d ./...
 
       - name: Build
-        run: go build -ldflags "-X main.version=${{ github.ref }}" -v .
+        run: go build -ldflags "-X main.version=${{ github.ref_name }}" -v .
 
       - name: Install FPM
         run: |
@@ -28,13 +28,13 @@ jobs:
           sudo gem install --no-document fpm
 
       - name: Build Debian package
-        run: fpm -s dir -t deb -n file64copy -v ${{ github.ref }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
+        run: fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
 
       - name: Build Fedora package
-        run: fpm -s dir -t rpm -n file64copy -v ${{ github.ref }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
+        run: fpm -s dir -t rpm -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
 
       - name: Build Arch package
-        run: fpm -s dir -t pacman -n file64copy -v ${{ github.ref }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
+        run: fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
 
       - name: Upload Debian Package
         uses: actions/upload-release-asset@v1
