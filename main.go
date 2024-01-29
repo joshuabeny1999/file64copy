@@ -27,34 +27,30 @@ func main() {
 
 	if *helpFlag {
 		printHelp()
+		os.Exit(0)
 	}
 
 	if *versionFlag {
-		fmt.Println("Version:", version)
+		printVersion()
 		os.Exit(0)
 	}
 
 	if flag.NArg() != 1 {
-		fmt.Println("Error: Please specify a file to encode.")
-		printHelp()
-		os.Exit(1)
+		printErrorAndHelp("Please specify a file to encode.")
 	}
 
 	fileName := flag.Arg(0)
-	fileContent, err := os.ReadFile(fileName)
+	encodedContent, err := encodeFile(fileName)
 	if err != nil {
-		fmt.Println("Error reading file:", err)
-		os.Exit(1)
+		printErrorAndExit("Error reading file:", err)
 	}
 
-	encodedContent := base64.StdEncoding.EncodeToString(fileContent)
-	command := fmt.Sprintf(`echo "%s" | openssl base64 -d -A -out %s`, encodedContent, filepath.Base(fileName))
+	command := generateCommand(encodedContent, fileName)
 
 	if *clipFlag {
-		cmd := exec.Command("sh", "-c", fmt.Sprintf(`echo '%s' | xclip -selection clipboard`, command))
-		err := cmd.Run()
+		err := copyToClipboard(command)
 		if err != nil {
-			fmt.Println("Failed to copy to clipboard:", err)
+			printErrorAndExit("Failed to copy to clipboard:", err)
 		}
 	} else {
 		fmt.Println(command)
@@ -66,5 +62,38 @@ func printHelp() {
 	fmt.Println("Encode a file to Base64 and generate a command to decode it.")
 	fmt.Println("\nOptions:")
 	getopt.PrintDefaults()
-	os.Exit(0)
+}
+
+func printVersion() {
+	fmt.Println("Version:", version)
+}
+
+func printErrorAndHelp(message string) {
+	fmt.Println("Error:", message)
+	printHelp()
+	os.Exit(1)
+}
+
+func printErrorAndExit(message string, err error) {
+	fmt.Println(message, err)
+	os.Exit(1)
+}
+
+func encodeFile(fileName string) (string, error) {
+	fileContent, err := os.ReadFile(fileName)
+	if err != nil {
+		return "", err
+	}
+
+	encodedContent := base64.StdEncoding.EncodeToString(fileContent)
+	return encodedContent, nil
+}
+
+func generateCommand(encodedContent, fileName string) string {
+	return fmt.Sprintf(`echo "%s" | openssl base64 -d -A -out %s`, encodedContent, filepath.Base(fileName))
+}
+
+func copyToClipboard(command string) error {
+	cmd := exec.Command("sh", "-c", fmt.Sprintf(`echo '%s' | xclip -selection clipboard`, command))
+	return cmd.Run()
 }
