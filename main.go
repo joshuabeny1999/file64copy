@@ -17,7 +17,7 @@ var (
 	clipFlag    = flag.Bool("clipboard", false, "Copy output to clipboard")
 )
 
-const version = "1.0.0"
+var version string = "development"
 
 func main() {
 	getopt.Alias("h", "help")

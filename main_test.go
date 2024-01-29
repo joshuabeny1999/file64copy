@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -17,7 +17,7 @@ func TestPrintHelp(t *testing.T) {
 
 	// Restore the standard output
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	// Check the output
@@ -36,17 +36,17 @@ func TestPrintVersion(t *testing.T) {
 
 	// Restore the standard output
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	// Check the output
-	if !strings.Contains(string(out), "Version: 1.0.0") {
-		t.Errorf("printVersion() = %s; want 'Version: 1.0.0'", string(out))
+	if !strings.Contains(string(out), "Version: development") {
+		t.Errorf("printVersion() = %s; want 'Version: development'", string(out))
 	}
 }
 
 func TestEncodeFile(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "example.*.txt")
+	tmpfile, err := os.CreateTemp("", "example.*.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
