@@ -51,7 +51,7 @@ jobs:
         id: arch
         run: |
           fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
-          OUTPUT=$(ls file64copy*.pkg.tar.xz)
+          OUTPUT=$(ls file64copy*.pkg.tar.zst)
           echo "path=${OUTPUT}" >> $GITHUB_ENV
         shell: bash
 
