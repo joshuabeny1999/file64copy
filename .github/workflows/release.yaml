@@ -3,6 +3,50 @@ name: Release
 on:
   release:
     types: [created]
+name: Release
+
+on:
+  release:
+    types: [created]
+  workflow_run:
+    workflows: ["Test"]
+    types:
+      - completed
+
+jobs:
+  release:
+    needs: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.21
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
+
+      - name: Build
+        run: go build -ldflags "-X main.version=${{ github.ref_name }}" -v .
+
+      - name: Install FPM and bsdtar
+        run: |
+          sudo apt-get install ruby ruby-dev rubygems build-essential libarchive-tools
+          sudo gem install --no-document fpm
+
+      - name: Build Debian package
+        id: deb
+        run: |
+          OUTPUT=$(fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
+          echo "::set-output name=path::${OUTPUT#*path=}"
+        shell: bash
+
+      - name: Build Fedora package
+        id: rpm
+        run: |
 
 jobs:
   release:
@@ -22,19 +66,31 @@ jobs:
       - name: Build
         run: go build -ldflags "-X main.version=${{ github.ref_name }}" -v .
 
-      - name: Install FPM
+      - name: Install FPM and bsdtar
         run: |
-          sudo apt-get install ruby ruby-dev rubygems build-essential
+          sudo apt-get install ruby ruby-dev rubygems build-essential libarchive-tools
           sudo gem install --no-document fpm
 
       - name: Build Debian package
-        run: fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
+        id: deb
+        run: |
+          OUTPUT=$(fpm -s dir -t deb -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
+          echo "::set-output name=path::${OUTPUT#*path=}"
+        shell: bash
 
       - name: Build Fedora package
-        run: fpm -s dir -t rpm -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
+        id: rpm
+        run: |
+          OUTPUT=$(fpm -s dir -t rpm -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
+          echo "::set-output name=path::${OUTPUT#*path=}"
+        shell: bash
 
       - name: Build Arch package
-        run: fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy
+        id: arch
+        run: |
+          OUTPUT=$(fpm -s dir -t pacman -n file64copy -v ${{ github.ref_name }} --depends xclip --maintainer "Joshua Hürzeler <joshua@joshuah.ch>" --prefix /usr/bin/ file64copy)
+          echo "::set-output name=path::${OUTPUT#*path=}"
+        shell: bash
 
       - name: Upload Debian Package
         uses: actions/upload-release-asset@v1
@@ -42,8 +98,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./file64copy.deb
-          asset_name: file64copy.deb
+          asset_path: ${{ steps.deb.outputs.path }}
+          asset_name: ${{ steps.deb.outputs.path }}
           asset_content_type: application/octet-stream
 
       - name: Upload Fedora Package
@@ -52,8 +108,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./file64copy.rpm
-          asset_name: file64copy.rpm
+          asset_path: ${{ steps.rpm.outputs.path }}
+          asset_name: ${{ steps.rpm.outputs.path }}
           asset_content_type: application/octet-stream
 
       - name: Upload Arch Package
@@ -62,6 +118,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./file64copy.pkg.tar.xz
-          asset_name: file64copy.pkg.tar.xz
+          asset_path: ${{ steps.arch.outputs.path }}
+          asset_name: ${{ steps.arch.outputs.path }}
           asset_content_type: application/octet-stream
